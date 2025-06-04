@@ -2,26 +2,26 @@
 
 set -e
 
-echo "📦 Mise à jour du système..."
+echo "📦 Updating the system..."
 sudo apt update && sudo apt upgrade -y
 
-echo "🧱 Installation des paquets nécessaires..."
+echo "🧱 Installation of the required packages..."
 sudo apt install -y php php-cli php-mbstring php-xml php-bcmath php-curl php-mysql php-zip unzip curl git nginx mysql-server php-fpm supervisor
 
-echo "🌐 Clonage du projet ParxShell..."
+echo "🌐 Downloading the parxshell server project..."
 sudo git clone https://gitlab.com/dividi/parx2.git /var/www/parx2
 cd /var/www/parx2
 
-echo "🔧 Installation de Composer..."
+echo "🔧 Installing Composer..."
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
 composer install
 
-echo "🔐 Configuration de Laravel (.env + clé)..."
+echo "🔐 Configuring Laravel (.env + key..."
 cp .env.example .env
 php artisan key:generate
 
-echo "🛡️ Configuration MySQL..."
+echo "🛡️ Configuring MySQL..."
 DB_NAME="parxshell"
 DB_USER="parxshell"
 DB_PASS="parxshell"
@@ -39,11 +39,11 @@ sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" .env
 
 php artisan migrate
 
-echo "🧑‍🏭 Permissions..."
+echo "🧑‍🏭 Creating permissions..."
 sudo chown -R www-data:www-data /var/www/parx2
 sudo chmod -R 755 /var/www/parx2
 
-echo "🌐 Configuration NGINX..."
+echo "🌐 Configuring NGINX..."
 sudo tee /etc/nginx/sites-available/parxshell > /dev/null <<EOF
 server {
     listen 80;
@@ -75,7 +75,7 @@ EOF
 sudo ln -sf /etc/nginx/sites-available/parxshell /etc/nginx/sites-enabled/parxshell
 sudo nginx -t && sudo systemctl reload nginx
 
-echo "🧩 Service systemd Laravel (php artisan serve)..."
+echo "🧩 Systemd Laravel Service (php artisan serve)..."
 sudo tee /etc/systemd/system/parxshell.service > /dev/null <<EOF
 [Unit]
 Description=Laravel ParxShell Development Server
@@ -130,5 +130,5 @@ sudo supervisorctl update
 sudo supervisorctl start laravel-schedule
 sudo supervisorctl start laravel-worker
 
-echo "✅ Installation complète de ParxShell !"
-echo "🌐 Accès : http://$(hostname -I | awk '{print $1}'):8000"
+echo "✅ Installation complete of ParxShell !"
+echo "🌐 Access : http://$(hostname -I | awk '{print $1}'):8000"
